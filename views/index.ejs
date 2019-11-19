@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/favicon.ico">
+
+    <title>微博</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/jumbotron.css" rel="stylesheet">
+    <style>
+      .avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+      }
+      .touxiang {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+      }
+      .alert {
+        display: none;
+      }
+      .loginuser {
+        font-size: 20px;
+        line-height: 40px;
+        font-weight: 600;
+        text-align: center;
+        padding-top: 20px;
+      }
+      .item {
+        height: 200px;
+      }
+      .pagination a {
+        cursor: pointer;
+      }
+      .blogs {
+        height: 400px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <% include header.ejs %>
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+      <div class="container">
+        <div class="row">
+          <% if(login == 'true') { %>
+            <div class="col-lg-2 loginuser">
+              <div><a href="/setavatar"><img class="avatar" src="<%= avatar %>" alt=""></a></div>
+              <div><%=username%></div>
+            </div>
+            <div class="col-lg-6">
+              <p>发表微博</p>
+              <textarea id="content" cols="100" rows="5" style="resize:none;"></textarea>
+              <p><a class="btn btn-primary btn-lg" id="publish" role="button">发布</a></p>
+            </div>
+          <% } else { %>  
+            <div class="col-lg-6">
+                <h1>欢迎！</h1>
+                <p>这是一个基于Nodejs的微博系统</p>
+                <p><a class="btn btn-primary btn-lg" href="/register" role="button">注册</a></p>
+            </div>
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="email" class="form-control" id="username" placeholder="请输入用户名">
+              </div>
+              <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" class="form-control" id="password" placeholder="请输入密码">
+              </div>
+              <button type="buton" class="btn  btn-success" id="login">登录</button>
+              <div class="alert alert-danger" role="alert"></div>
+            </div>
+          <% } %>  
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Example row of columns -->
+      <nav aria-label="Page navigation">
+        <ul class="pagination"></ul>
+      </nav>
+      <div class="row blogs"></div>
+
+      <hr>
+
+      <footer>
+        <p>&copy; 2019</p>
+      </footer>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script>
+      function getPageBlogs(page) {
+        $.ajax({
+          url: '/getallblogs',
+          type: 'get',
+          dataType: 'json',
+          data: {
+            page: page
+          },
+          success: function(data) {
+            var htmlFragment = '';
+            (function iterator(i) {
+              if(i == data.length) {
+                $('.blogs').html(htmlFragment);
+                return;
+              }
+              $.ajax({
+                url: 'getuserinfo',
+                type: 'get',
+                dataType: 'json',
+                data: {
+                  'username': data[i].username
+                },
+                success: function(info) {
+                  htmlFragment += '<div class="col-md-4 item"><h2><img class="touxiang" src="' + info.avatar + '" alt=""> ' + data[i].username + ':</h2><p>' + data[i].content + '</p><p>' + data[i].datetime + '</p><p><a class="btn btn-default" href="#" role="button">详细 &raquo;</a></p></div>';
+                  iterator(++i);
+                },
+                error: function(err) {
+                  console.log(err);
+                }
+              });
+            })(0);
+          },
+          error: function(err) {
+            console.log(err);
+          }
+        });
+      }
+
+      $.ajax({
+        url: '/getblogscount',
+        type: 'get',
+        dataType: 'json',
+        success: function(data) {
+          var htmlFragment = '';
+          var page = Math.ceil(data / 6);
+          for(let i = 1; i <= page; i++) {
+            htmlFragment += '<li data-page="' + i + '" ><a>' + i + '</a></li>';
+          }
+          $('.pagination').html(htmlFragment);
+          $('.pagination li:first').addClass('active');
+
+          $('.pagination li').click(function() {
+            var page = parseInt($(this).attr('data-page'));
+            getPageBlogs(page);
+            $(this).addClass('active').siblings().removeClass('active');   
+          });
+        },
+        error: function(err) {
+          console.log(err);
+        }
+      });
+      getPageBlogs(1);    
+
+      $('input').focus(function() {
+        $('.alert').fadeOut();
+      });
+
+      $('#login').click(function() {
+        $.ajax({
+          url: '/dologin',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            username: $('#username').val(),
+            password: $('#password').val()
+          },
+          success: function(data) {
+            if(data == 1) {
+              window.location = '/';
+            } else if(data == -1) {
+              $('.alert').html('用户不存在');
+              $('.alert').fadeIn();
+            } else if(data == -2) {
+              $('.alert').html('密码错误');
+              $('.alert').fadeIn();
+            } else if(data == -5) {
+              $('.alert').html('服务器出现错误');
+              $('.alert').fadeIn();
+            }
+          },
+          error: function(err) {
+            console.log(err);
+          }
+        });
+      });
+
+      $('#publish').click(function() {
+        $.ajax({
+          url: '/publish',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            content: $('#content').val()
+          },
+          success: function(data) {
+            if(data == 1) {
+              alert('发布成功！');
+              location.reload();
+            } else if(data == -1) {
+              alert('发布失败，请联系管理员！');
+            }
+          },
+          error: function(err) {
+            console.log(err);
+          }
+        })
+      });
+    </script>
+  </body>
+</html>

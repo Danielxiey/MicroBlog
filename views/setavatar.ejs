@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/favicon.ico">
+
+    <title>上传头像-微博</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/jumbotron.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <% include header.ejs %>
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+
+    <div class="container">
+      <h1>上传头像</h1>
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label for="setavatar">请上传头像</label>
+            <input type="file" id="setavatar" name="avatar">
+          </div>
+          <button type="buton" class="btn btn-default" id="upload">上传</button>
+        </div>
+      </div>
+      <hr>
+
+      <footer>
+        <p>&copy; 2019</p>
+      </footer>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script>
+      $('#upload').click(function() {
+        var formData = new FormData();
+        formData.append('avatar', $('#setavatar')[0].files[0]);
+        if(!formData) {
+          alert('请先选择图片！');
+          return;
+        }
+
+        $.ajax({
+          url: '/uploadimg',
+          type: 'POST',
+          dataType: 'json',
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function(data) {
+            if(data == 1) {
+              alert('上传成功！');
+              window.location = '/cut';
+            } else if(data == -1) {
+              alert('上传失败！');
+            }
+          },
+          error: function(err) {
+            console.log(err);
+          }
+        })
+      })
+    </script>
+  </body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/favicon.ico">
+
+    <title>成员列表</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/jumbotron.css" rel="stylesheet">
+    <style>
+      h1 {
+        margin: 20px 0;
+      }
+      .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 20px;
+      }
+      .person {
+        font-size: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <% include header.ejs %>
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+
+    <div class="container">
+      <h1>成员列表</h1>
+      <div>
+        <% for(var i = 0; i < members.length; i++) { %>
+          <p class="person"><a href="/user/<%= members[i].username %>"><img class="avatar" src="/<%= members[i].avatar %>" alt=""></a> <%= members[i].username %></p>  
+          <hr>
+        <% } %>  
+      </div>
+
+      <footer>
+        <p>&copy; 2019</p>
+      </footer>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+  </body>
+</html>
